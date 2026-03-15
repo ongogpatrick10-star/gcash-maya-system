@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GCash/Maya System Record</title>
+<style>
+/* ================= RAINBOW ANIMATED BACKGROUND ================= */
+body {
+  font-family: Arial, sans-serif;
+  color: white;
+  margin: 0;
+  padding: 10px;
+  background: linear-gradient(270deg, #ff3c3c, #ffad3c, #3cff7f, #3cbaff, #9b3cff);
+  background-size: 1000% 1000%;
+  animation: rainbowBG 15s ease infinite;
+}
+
+@keyframes rainbowBG {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+
+/* ================= GENERAL CONTAINER ================= */
+.container {
+  max-width: 800px;
+  width: 90%;
+  margin: auto;
+  background: rgba(0,0,0,0.7);
+  padding: 25px;
+  border-radius: 15px;
+  margin-top: 30px;
+}
+
+label { font-size: 14px; margin-bottom: 5px; display: block; }
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+#passGuide {
+  font-size: 13px;
+  padding: 8px;
+  border-radius: 6px;
+  margin: 5px 0 15px 0;
+}
+
+.error { background: rgba(255,92,92,0.3); color: #ffdddd; border: 1px solid #ff5c5c; }
+.success { background: rgba(0,255,157,0.3); color: #ddffdd; border: 1px solid #00ff9d; }
+
+.checkbox-group { display: flex; align-items: center; margin: 5px 0; }
+.checkbox-group input { width: auto; margin-right: 8px; }
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.signupBtn { background: #0099ff; color: white; }
+.loginBtn { background: #00ff9d; color: black; }
+.logoutBtn { background: #ff5c5c; color: white; }
+.historyBtn { background: #ffdd3c; color: black; }
+
+button:disabled { background: #ccc; color: #666; cursor: not-allowed; }
+
+/* ================= RECEIPT ================= */
+.receipt {
+  border: 2px dashed white;
+  padding: 15px;
+  margin-top: 15px;
+  display: none;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.5);
+  animation: flash 0.5s ease;
+}
+
+@keyframes flash {
+  0% { background: rgba(255,255,255,0.2); }
+  50% { background: rgba(0,255,157,0.3); }
+  100% { background: rgba(0,0,0,0.5); }
+}
+
+/* ================= ALERT ================= */
+#simpleAlert {
+  max-width: 350px;
+  margin: auto;
+  background: rgba(0,0,0,0.8);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+  text-align: center;
+  display: none;
+  border: 1px solid #ff5c5c;
+}
+
+/* ================= HISTORY TABLE ================= */
+.history-container { overflow-x: auto; margin-top: 15px; }
+#history {
+  width: 100%;
+  max-width: 100%;
+  margin: auto;
+  border-collapse: collapse;
+  background: white;
+  color: black;
+  display: none;
+  table-layout: fixed;
+}
+
+#history th, #history td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  font-size: 12px;
+  text-align: center;
+  word-wrap: break-word;
+}
+
+#history tr:nth-child(even){ background: #f0f0f0; }
+#history tr:nth-child(odd){ background: #d8f0ff; }
+#history th{ background: #ffad3c; color: black; }
+
+/* ================= RESPONSIVE FOR DESKTOP ================= */
+@media(min-width: 768px){
+  body { font-size: 18px; }
+  input, button { font-size: 18px; padding: 15px; }
+  #history th, #history td { font-size: 14px; padding: 10px; }
+  .container { padding: 35px; margin-top: 50px; }
+}
+</style>
+</head>
+<body>
+<div id="simpleAlert"></div>
+
+<!-- SIGNUP -->
+<div class="container" id="signupPage">
+  <h2>✨ CREATE ADMIN ACCOUNT</h2>
+  <label>🔹 ADMIN USERNAME</label>
+  <input type="text" id="newUser" placeholder="Enter your username">
+  <label>🔹 ADMIN PASSWORD</label>
+  <input type="password" id="newPass" placeholder="Enter your password">
+  <div class="checkbox-group">
+    <input type="checkbox" id="showPass" onclick="togglePass()">
+    <label for="showPass">👁️ Show Password</label>
+  </div>
+  <div id="passGuide" class="error">
+    📌 PASSWORD RULES:<br>• 6+ chars<br>• 1 UPPERCASE<br>• 1 lowercase<br>• 1 NUMBER
+  </div>
+  <button class="signupBtn" id="signupBtn" onclick="signup()" disabled>✅ CREATE ACCOUNT</button>
+</div>
+
+<!-- LOGIN -->
+<div class="container" id="loginPage" style="display:none">
+  <h2>🔐 ADMIN LOGIN</h2>
+  <label>🔹 USERNAME</label>
+  <input type="text" id="username" placeholder="Enter username">
+  <label>🔹 PASSWORD</label>
+  <input type="password" id="password" placeholder="Enter password">
+  <div class="checkbox-group">
+    <input type="checkbox" id="showLoginPass" onclick="toggleLoginPass()">
+    <label for="showLoginPass">👁️ Show Password</label>
+  </div>
+  <button class="loginBtn" onclick="login()">🔑 LOGIN NOW</button>
+  <button class="signupBtn" style="margin-top:10px;" onclick="backToSignup()">✨ CREATE ACCOUNT</button>
+</div>
+
+<!-- MAIN APP -->
+<div class="container" id="mainApp" style="display:none">
+  <h2>💰 GCash/Maya RECORD SYSTEM</h2>
+  <input type="text" id="name" placeholder="Customer Name">
+  <input type="text" id="number" placeholder="09XXXXXXXXX">
+  <input type="number" id="amount" placeholder="Amount">
+  
+  <button class="loginBtn" onclick="generateLoad()">💾 SAVE TRANSACTION</button>
+  <button class="logoutBtn" onclick="logout()">🚪 LOGOUT</button>
+  <button class="historyBtn" onclick="toggleHistory()">📋 SHOW / HIDE HISTORY</button>
+  
+  <div class="receipt" id="receipt">
+    <h3>📄 LOAD RECEIPT</h3>
+    <p>Receipt #: <span id="rno"></span></p>
+    <p>Name: <span id="rname"></span></p>
+    <p>Number: <span id="rnumber"></span></p>
+    <p>Amount: ₱<span id="ramount"></span></p>
+    <p>Date: <span id="rdate"></span></p>
+  </div>
+
+  <h3>📊 TOTAL INCOME: ₱<span id="income">0</span></h3>
+
+  <div class="history-container">
+    <table id="history">
+      <tr>
+        <th>Receipt #</th>
+        <th>Name</th>
+        <th>Number</th>
+        <th>Amount</th>
+        <th>Date</th>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<script>
+// ========= GLOBAL VARIABLES ==========
+let receiptCount=0, income=0, historyData=[], currentAdmin="";
+
+// ========= PASSWORD TOGGLE ==========
+function togglePass(){ let f=document.getElementById("newPass"); f.type=f.type==="password"?"text":"password"; }
+function toggleLoginPass(){ let f=document.getElementById("password"); f.type=f.type==="password"?"text":"password"; }
+
+// ========= REALTIME SIGNUP CHECK ==========
+document.getElementById("newPass").addEventListener("input", checkDetails);
+document.getElementById("newUser").addEventListener("input", checkDetails);
+function checkDetails(){
+  let user=document.getElementById("newUser").value.trim();
+  let pass=document.getElementById("newPass").value;
+  let guide=document.getElementById("passGuide");
+  let btn=document.getElementById("signupBtn");
+  let hasUpper=/[A-Z]/.test(pass);
+  let hasLower=/[a-z]/.test(pass);
+  let hasNum=/\d/.test(pass);
+  let hasLength=pass.length>=6;
+
+  if(pass.length===0){ guide.innerHTML="📌 PASSWORD RULES"; btn.disabled=true; guide.className="error"; }
+  else if(!hasLength){ guide.innerHTML="❌ Too short!"; btn.disabled=true; guide.className="error"; }
+  else if(!hasUpper){ guide.innerHTML="❌ Missing UPPERCASE"; btn.disabled=true; guide.className="error"; }
+  else if(!hasLower){ guide.innerHTML="❌ Missing lowercase"; btn.disabled=true; guide.className="error"; }
+  else if(!hasNum){ guide.innerHTML="❌ Missing NUMBER"; btn.disabled=true; guide.className="error"; }
+  else if(user.length===0){ guide.innerHTML="✅ Good password, enter username"; btn.disabled=true; guide.className="success"; }
+  else{ guide.innerHTML="✅ All good!"; btn.disabled=false; guide.className="success"; }
+}
+
+// ========= ALERT ==========
+function showAlert(msg){ let a=document.getElementById("simpleAlert"); a.innerHTML=msg; a.style.display="block"; setTimeout(()=>a.style.display="none",3000); }
+
+// ========= SIGNUP ==========
+function signup(){
+  let u=document.getElementById("newUser").value.trim();
+  let p=document.getElementById("newPass").value;
+  if(u===""||p===""){ showAlert("❌ Fill out all fields!"); return; }
+
+  localStorage.setItem("adminUser_"+u,u);
+  localStorage.setItem("adminPass_"+u,p);
+
+  // Initialize per-admin storage
+  localStorage.setItem(u+"_history", JSON.stringify([]));
+  localStorage.setItem(u+"_income", 0);
+  localStorage.setItem(u+"_receipt", 0);
+
+  showAlert("✅ New account created! Redirecting to login...");
+
+  setTimeout(()=>{
+    document.getElementById("signupPage").style.display="none";
+    document.getElementById("loginPage").style.display="block";
+    document.getElementById("newUser").value="";
+    document.getElementById("newPass").value="";
+    checkDetails();
+  },2000);
+}
+
+// ========= BACK TO SIGNUP ==========
+function backToSignup(){
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("signupPage").style.display="block";
+  document.getElementById("username").value="";
+  document.getElementById("password").value="";
+  checkDetails();
+}
+
+// ========= LOGIN ==========
+function login(){
+  let u=document.getElementById("username").value.trim();
+  let p=document.getElementById("password").value;
+  let savedUser=localStorage.getItem("adminUser_"+u);
+  let savedPass=localStorage.getItem("adminPass_"+u);
+  if(u===""||p===""){ showAlert("❌ Enter username and password!"); return; }
+  if(savedUser===null){ showAlert("❌ Username not found!"); return; }
+  if(p!==savedPass){ showAlert("❌ Wrong password!"); return; }
+
+  showAlert("✅ Logged in successfully!");
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("mainApp").style.display="block";
+  document.getElementById("username").value="";
+  document.getElementById("password").value="";
+
+  currentAdmin = u;
+
+  // Clear previous receipt popup
+  document.getElementById("receipt").style.display = "none";
+  document.getElementById("rno").innerText = "";
+  document.getElementById("rname").innerText = "";
+  document.getElementById("rnumber").innerText = "";
+  document.getElementById("ramount").innerText = "";
+  document.getElementById("rdate").innerText = "";
+
+  loadAdminData(u);
+}
+
+// ========= LOGOUT ==========
+function logout(){
+  document.getElementById("mainApp").style.display="none";
+  document.getElementById("loginPage").style.display="block";
+  currentAdmin="";
+
+  // Hide receipt
+  document.getElementById("receipt").style.display = "none";
+  document.getElementById("rno").innerText = "";
+  document.getElementById("rname").innerText = "";
+  document.getElementById("rnumber").innerText = "";
+  document.getElementById("ramount").innerText = "";
+  document.getElementById("rdate").innerText = "";
+}
+
+// ========= LOAD DATA FOR ADMIN ==========
+function loadAdminData(user){
+  historyData=JSON.parse(localStorage.getItem(user+"_history")) || [];
+  income=Number(localStorage.getItem(user+"_income")) || 0;
+  receiptCount=Number(localStorage.getItem(user+"_receipt")) || 0;
+  updateMainAppData();
+}
+
+// ========= SAVE TRANSACTION ==========
+function generateLoad(){
+  let n=document.getElementById("name").value.trim();
+  let num=document.getElementById("number").value.trim();
+  let a=document.getElementById("amount").value.trim();
+  if(n===""||num===""||a===""){ showAlert("❌ Fill out all customer details!"); return; }
+  if(num.length!==11 || !num.startsWith("09")){ showAlert("❌ Invalid number!"); return; }
+  if(historyData.find(t=>t.number===num) && !confirm("⚠️ Number exists. Continue?")) return;
+
+  receiptCount++;
+  let date=new Date().toLocaleString();
+  document.getElementById("rno").innerText=receiptCount;
+  document.getElementById("rname").innerText=n;
+  document.getElementById("rnumber").innerText=num;
+  document.getElementById("ramount").innerText=a;
+  document.getElementById("rdate").innerText=date;
+  document.getElementById("receipt").style.display="block";
+
+  historyData.push({receipt:receiptCount,name:n,number:num,amount:a,date});
+  localStorage.setItem(currentAdmin+"_history", JSON.stringify(historyData));
+  income+=Number(a);
+  localStorage.setItem(currentAdmin+"_income", income);
+  localStorage.setItem(currentAdmin+"_receipt", receiptCount);
+
+  document.getElementById("income").innerText=income;
+  document.getElementById("name").value="";
+  document.getElementById("number").value="";
+  document.getElementById("amount").value="";
+
+  updateMainAppData();
+}
+
+// ========= UPDATE TABLE ==========
+function updateMainAppData(){
+  document.getElementById("income").innerText=income;
+  let t=document.getElementById("history");
+  while(t.rows.length>1) t.deleteRow(1);
+  historyData.forEach(x=>{
+    let r=t.insertRow(-1);
+    r.insertCell(0).innerText=x.receipt;
+    r.insertCell(1).innerText=x.name;
+    r.insertCell(2).innerText=x.number;
+    r.insertCell(3).innerText="₱"+x.amount;
+    r.insertCell(4).innerText=x.date;
+  });
+}
+
+// ========= TOGGLE HISTORY ==========
+function toggleHistory(){
+  let t=document.getElementById("history");
+  t.style.display=t.style.display==="none"?"table":"none";
+}
+</script>
+</body>
+</html>
